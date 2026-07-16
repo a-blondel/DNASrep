@@ -1,0 +1,12 @@
+# Override to build the images locally instead of pulling them from the registry.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml build
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up -d
+#
+# (The CI builds and publishes these images to GHCR; hosts just pull them via the
+# plain docker-compose.yml.)
+services:
+  web:
+    build: ./web
+  tls:
+    build: ./tls

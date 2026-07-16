@@ -1,7 +1,7 @@
 services:
   # Application service: Apache + PHP (plain HTTP, internal to the compose network)
   web:
-    build: ./web
+    image: ${DNAS_IMAGE:-ghcr.io/a-blondel/dnasrep}/web:${DNAS_TAG:-latest}
     container_name: dnas-web
     restart: unless-stopped
     expose:
@@ -11,7 +11,7 @@ services:
 
   # Legacy TLS termination: stunnel + OpenSSL 1.0.2
   tls:
-    build: ./tls
+    image: ${DNAS_IMAGE:-ghcr.io/a-blondel/dnasrep}/tls:${DNAS_TAG:-latest}
     container_name: dnas-tls
     restart: unless-stopped
     depends_on:

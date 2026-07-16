@@ -33,17 +33,53 @@ therefore isolated in its own tiny service:
 
 Both containers are tiny (≈ 10 MB + ≈ 3 MB of RAM at rest).
 
-## Quick start
+## Quick start (pre-built images)
+
+Images are built by CI and published to the GitHub Container Registry, so a host
+only needs `docker-compose.yml` and a `.env` — no clone, no build:
 
 ```bash
-cp .env.example .env      # set HOST_IP and REGION
-docker compose build      # the tls service builds OpenSSL 1.0.2: a few minutes
+# on each host: drop docker-compose.yml + .env, then
+cp .env.example .env      # set HOST_IP, REGION and DNAS_IMAGE
+docker compose pull
 docker compose up -d
 docker compose logs -f
 ```
 
 Certificates are **generated at startup** (a forged "VeriSign Class 3" chain,
 RSA-1024, ~2048 validity) and stored in `./certs`.
+
+### Building the images yourself
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.build.yml build
+docker compose -f docker-compose.yml -f docker-compose.build.yml up -d
+```
+
+(The `tls` image compiles OpenSSL 1.0.2, so this first build takes a few minutes.)
+
+### Images / CI
+
+A GitHub Actions workflow (`.github/workflows/docker.yml`) builds both services
+and pushes them to GHCR:
+
+- `${DNAS_IMAGE}/web:latest`
+- `${DNAS_IMAGE}/tls:latest`
+
+`DNAS_IMAGE` defaults to `ghcr.io/<owner>/dnasrep` — set it in `.env` to match your
+repository path. Packages on GHCR are private by default; make them public (or log
+in with `docker login ghcr.io`) so the hosts can pull them.
+
+### Without compose (docker run)
+
+```bash
+docker network create dnas
+docker run -d --name dnas-web --network dnas --restart unless-stopped \
+  --memory 128m ghcr.io/a-blondel/dnasrep/web:latest
+docker run -d --name dnas-tls --network dnas --restart unless-stopped \
+  --memory 64m -p 443:443 -e REGION=eu -e BACKEND=web:80 \
+  -v "$PWD/certs:/etc/dnas" ghcr.io/a-blondel/dnasrep/tls:latest
+```
 
 ## One region per deployment
 
