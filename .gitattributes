@@ -1,0 +1,9 @@
+# Shell scripts and configs must keep LF endings (they run in Linux containers).
+*.sh        text eol=lf
+Dockerfile  text eol=lf
+*.conf      text eol=lf
+*.yml       text eol=lf
+*.example   text eol=lf
+
+# Captured DNAS packet files are binary; never normalize line endings.
+web/app/dnas/**/packets/** binary

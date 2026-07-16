@@ -1,0 +1,5 @@
+# Certificates generated at runtime (contain private keys)
+certs/
+
+# Local environment configuration
+.env

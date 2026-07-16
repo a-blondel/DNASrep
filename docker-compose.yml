@@ -1,0 +1,34 @@
+services:
+  # Application service: Apache + PHP (plain HTTP, internal to the compose network)
+  web:
+    build: ./web
+    container_name: dnas-web
+    restart: unless-stopped
+    expose:
+      - "80"
+    # RAM safety net (small hosts). Adjust if needed.
+    mem_limit: 128m
+
+  # Legacy TLS termination: stunnel + OpenSSL 1.0.2
+  tls:
+    build: ./tls
+    container_name: dnas-tls
+    restart: unless-stopped
+    depends_on:
+      - web
+    environment:
+      # Region served by this deployment (one region per deployment: the PS2 sends
+      # no SNI and validates the certificate CN, so one IP serves one region).
+      REGION: ${REGION:-eu}
+      # true = generate if missing | force = regenerate every start | false = use mounted certs
+      REGEN_CERTS: ${REGEN_CERTS:-true}
+      # Application backend (web service on the compose network)
+      BACKEND: web:80
+    ports:
+      # Bind on the host IP (HOST_IP in .env). 0.0.0.0 = all interfaces.
+      - "${HOST_IP:-0.0.0.0}:443:443"
+    volumes:
+      # Persist / inspect the generated certificates
+      - ./certs:/etc/dnas
+    # RAM safety net (small hosts).
+    mem_limit: 64m
