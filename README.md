@@ -72,13 +72,25 @@ in with `docker login ghcr.io`) so the hosts can pull them.
 
 ### Without compose (docker run)
 
+For hosts without the compose plugin (e.g. GCP Container-Optimized OS), use the
+`run.sh` helper — it creates the network + volume and runs both containers:
+
+```bash
+bash run.sh us        # region = eu (default) | us | jp   (sudo bash run.sh us if docker needs root)
+```
+
+On Container-Optimized OS, `/home` is mounted `noexec`, so run it as `bash run.sh`
+(not `./run.sh`) and don't bother installing the compose binary — it can't execute
+there. Equivalent manual commands:
+
 ```bash
 docker network create dnas
+docker volume create dnas-certs
 docker run -d --name dnas-web --network dnas --restart unless-stopped \
   --memory 128m ghcr.io/a-blondel/dnasrep/web:latest
 docker run -d --name dnas-tls --network dnas --restart unless-stopped \
   --memory 64m -p 443:443 -e REGION=eu -e BACKEND=web:80 \
-  -v "$PWD/certs:/etc/dnas" ghcr.io/a-blondel/dnasrep/tls:latest
+  -v dnas-certs:/etc/dnas ghcr.io/a-blondel/dnasrep/tls:latest
 ```
 
 ## One region per deployment
