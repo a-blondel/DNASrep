@@ -27,7 +27,7 @@ docker pull "${IMAGE}/tls:${TAG}"
 # Recreate cleanly (idempotent)
 docker rm -f dnas-web dnas-tls 2>/dev/null || true
 
-docker run -d --name dnas-web --network dnas --restart unless-stopped \
+docker run -d --name dnas-web --network dnas --network-alias web --restart unless-stopped \
 	--memory 128m "${IMAGE}/web:${TAG}"
 
 docker run -d --name dnas-tls --network dnas --restart unless-stopped \
