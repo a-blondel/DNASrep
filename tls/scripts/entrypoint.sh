@@ -56,10 +56,12 @@ accept = 0.0.0.0:443
 connect = ${BACKEND}
 cert = ${CERT_DIR}/server-chain.pem
 key = ${CERT_DIR}/server-key.pem
-; With OpenSSL 1.0.2, stunnel negotiates TLS 1.0->1.2 (SSLv2/3 off by default) and
-; accepts the PS2's SSLv2-format ClientHello. ciphers = ALL exposes the weak
-; suites (RC4-SHA / 3DES) the PS2 actually uses.
-ciphers = ALL
+; OpenSSL 1.0.2 accepts the PS2's SSLv2-format ClientHello and negotiates TLS 1.0.
+; The PS2's DNAS SSL natively uses RC4-SHA. Newer stunnel/OpenSSL break the PS2's
+; DHE handshake (client Finished -> fatal "Bad Record MAC"), so exclude DHE and
+; prefer RC4-SHA (server cipher preference) to force the working, PS2-native cipher.
+ciphers = RC4-SHA:RC4-MD5:DES-CBC3-SHA:ALL:!DH
+options = CIPHER_SERVER_PREFERENCE
 TIMEOUTclose = 0
 EOF
 

@@ -4,17 +4,20 @@
 # Required because no modern distro OpenSSL (1.1.1 / 3.x) can still serve the
 # legacy handshake the PS2 uses: an SSLv2-format ClientHello, TLS 1.0, weak
 # ciphers (RC4-SHA / 3DES) and a 1024-bit RSA certificate.
+#
+# 1.0.2u is the last PUBLIC 1.0.2 release (Dec 2019); later 1.0.2z* versions are
+# only available under OpenSSL's paid premium support.
 set -e
 
 app_home="$1"
 cd "$app_home"
 
 echo "================================================"
-echo "Building OpenSSL 1.0.2 (weak ciphers)"
+echo "Building OpenSSL 1.0.2u (weak ciphers)"
 echo "================================================"
-wget -q https://www.openssl.org/source/openssl-1.0.2k.tar.gz
-tar -xf openssl-1.0.2k.tar.gz
-cd openssl-1.0.2k
+wget -q https://github.com/openssl/openssl/releases/download/OpenSSL_1_0_2u/openssl-1.0.2u.tar.gz
+tar -xf openssl-1.0.2u.tar.gz
+cd openssl-1.0.2u
 # enable-ssl2/ssl3 lets the server accept the PS2's SSLv2-format ClientHello;
 # enable-weak-ssl-ciphers brings back RC4/DES/3DES.
 ./config --prefix=/opt/openssl --openssldir=/opt/openssl \
@@ -33,9 +36,11 @@ echo "================================================"
 echo "Building stunnel"
 echo "================================================"
 cd "$app_home"
-wget -q https://www.stunnel.org/archive/5.x/stunnel-5.58.tar.gz
-tar xzf stunnel-5.58.tar.gz
-cd stunnel-5.58/
+# Latest published tarball (June 2026). Note: it self-reports as "5.78" via
+# `stunnel -version` (upstream release quirk); the source is the 5.79 archive.
+wget -q https://www.stunnel.org/archive/5.x/stunnel-5.79.tar.gz
+tar xzf stunnel-5.79.tar.gz
+cd stunnel-5.79/
 ./configure CPPFLAGS="-I/opt/openssl/include" LDFLAGS="-L/opt/openssl/lib"
 make -j"$(nproc)"
 make install

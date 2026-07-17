@@ -2,7 +2,7 @@
 # Terminates the PS2's legacy handshake (SSLv2-format ClientHello, TLS 1.0,
 # RC4-SHA / 3DES, 1024-bit RSA) that no modern distro OpenSSL can serve, and
 # forwards plaintext to the "web" service.
-FROM alpine:3.16.5
+FROM alpine:3.24.1
 
 RUN apk --update --no-cache add \
 		build-base \
