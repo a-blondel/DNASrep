@@ -20,6 +20,10 @@ echo "Deploying DNASrep (region=${REGION}, image=${IMAGE}, tag=${TAG})"
 docker network create dnas 2>/dev/null || true
 docker volume create dnas-certs >/dev/null
 
+# Pull the latest images (docker run alone would reuse a cached :latest)
+docker pull "${IMAGE}/web:${TAG}"
+docker pull "${IMAGE}/tls:${TAG}"
+
 # Recreate cleanly (idempotent)
 docker rm -f dnas-web dnas-tls 2>/dev/null || true
 
